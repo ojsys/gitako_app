@@ -13,6 +13,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String _email = '';
   String _fullName = '';
   String _password = '';
+  String _confirmPassword = '';
   String _phoneNumber = '';
   String _gender = '';
   String _age = '';
@@ -27,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         title: Text('Register'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -43,13 +44,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: InputDecoration(labelText: 'Full Name'),
                 onSaved: (value) {
                   _fullName = value!;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                onSaved: (value) {
-                  _password = value!;
                 },
               ),
               TextFormField(
@@ -94,6 +88,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   _farmName = value!;
                 },
               ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                onSaved: (value) {
+                  _password = value!;
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a password';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Confirm Password'),
+                obscureText: true,
+                onSaved: (value) {
+                  _confirmPassword = value!;
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please confirm your password';
+                  }
+                  return null;
+                },
+              ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
@@ -110,6 +130,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      // Validate password and confirmPassword match
+      if (_password != _confirmPassword) {
+        _showErrorDialog('Passwords do not match');
+        return;
+      }
+
       try {
         final response = await _authService.register(
           _email,
@@ -125,9 +151,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
         // handle successful registration here like navigate to login page.
         print("Registration successful: $response");
+
+        // Navigate to the login screen after successful registration
+        Navigator.pushReplacementNamed(context, '/login');
       } catch (e) {
         print("Registration failed: $e");
       }
     }
   }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
+  } // End ErrorDailog
+
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Success'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
+  } // End SuccessDialog
 }

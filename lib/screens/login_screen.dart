@@ -43,6 +43,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: _submitForm,
                 child: Text('Login'),
               ),
+              SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/register');
+                },
+                child: Text('Don’t have an account? Register here.'),
+              ),
             ],
           ),
         ),
